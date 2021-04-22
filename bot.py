@@ -1,16 +1,17 @@
+from requests.sessions import dispatch_hook
 import discord
 import os
 import requests
 import json
+from dotenv import load_dotenv
 
-from requests.sessions import dispatch_hook
+load_dotenv()
+
 
 client = discord.Client()
 
-with open('.gitignore/config.json', 'r') as f:
-    token_data = json.load(f)
 
-dc_token = token_data["token"]
+dc_token = os.getenv("DISCORD_TOKEN")
 
 
 def get_quote():
