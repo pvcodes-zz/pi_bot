@@ -1,3 +1,4 @@
 *.env
 templates*
 discord.log
+__pycache__
