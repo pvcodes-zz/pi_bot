@@ -14,7 +14,7 @@ class Maths(commands.Cog):
         if ctx.invoked_subcommand is None:
             await ctx.send('> Invalid command, Look ``-help maths``')
 
-    @maths.command(name='a')
+    @maths.command(name='add')
     async def add(self, ctx, n1: int, n2: int, *numbers: int):
         sum = n1+n2
         for i in numbers:

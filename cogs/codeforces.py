@@ -12,15 +12,9 @@ class Codeforces(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # Events
-    @commands.Cog.listener()
-    async def ez(self, ctx):
-        print("EZ BOLTE")
-        await ctx.send("EZ BOLTE")
-
 
     # Commands
-    @commands.command(name='rating')
+    @commands.command(name='rating', aliases=['r'])
     async def rating(self,ctx, username: str):
         
         data = is_valid(username)
