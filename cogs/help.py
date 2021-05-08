@@ -68,7 +68,7 @@ class Help(commands.Cog):
             )
             emb.add_field(
                 name="To get more about commands",
-                value=f"Visit [Commands Docs](docs/COMMAND.md) or join our [Support Server](https://discord.gg/uGWfQY4dj4)",
+                value=f"Visit [Commands Docs](https://github.com/pvcodes/pi_bot/blob/main/docs/COMMAND.md) or join our [Support Server](https://discord.gg/uGWfQY4dj4)",
                 inline=False
             )
             emb.set_footer(text=f"Bot is running {version}")
