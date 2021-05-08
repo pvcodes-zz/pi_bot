@@ -1,23 +1,43 @@
-# from os import sendfile
+from random import random
 import discord
-from discord.ext import commands
-from datetime import datetime
+from discord import client
+from discord import guild
+from discord.ext import commands, tasks
+from datetime import timedelta, timezone
+import datetime
 
-import requests
+
 import json
+from dotenv.main import set_key
+from six import with_metaclass
+from src.helper import _textFormatting, _isValid, _userInfo, _getProblem, _getChannelId, _getRoleId, _sendEmbed
+
+
+def _getContest():
+    with open('src/contests.json', 'r') as f:
+        returndata = json.load(f)
+        print(returndata[0])
+    return returndata
 
 
 class Codeforces(commands.Cog):
+    """Module for Codeforces Stuff"""
 
     def __init__(self, bot):
         self.bot = bot
+        # task = self.test.start()
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print(f'----{self.__class__.__name__} Cog have been loaded----')
 
-    # Commands
-    @commands.command(name='rating', aliases=['r'])
-    async def rating(self,ctx, username: str):
-        
-        data = is_valid(username)
+    @commands.command(
+        name='rating', aliases=['r'], description='Get the rating of the user'
+    )
+    async def __rating(self, ctx, username: str):
+        """For getting the rating of an user"""
+
+        data = _isValid(username)
         if data:
             if 'rating' in data['result'][0]:
                 rating = data["result"][0]["rating"]
@@ -29,18 +49,22 @@ class Codeforces(commands.Cog):
 
         await ctx.send(return_msg)
 
-
-    @commands.command(name='info',aliases=['i'])
-    async def user(self,ctx, username: str):
-        data = is_valid(username)
+    @commands.command(
+        name='info', aliases=['i'], description='Get the full info of the user'
+    )
+    async def __user(self, ctx, username: str):
+        """For getting the full info of an user"""
+        data = _isValid(username)
 
         if data:
             # parsed data
             data = data["result"][0]
-            data = user_info(data)
+            data = _userInfo(data)
+            name = f"{data['firstName']} {data['lastName']} @{username}"
+            embed = discord.Embed(
+                title=name, url=f"https://codeforces.com/profile/{username}", color=discord.Color.blue())
 
             # local variables
-            name = f"{data['firstName']} {data['lastName']} @{username}"
             img_url = data['titlePhoto']
             country = data['country']
             rank = f"{data['rank']} (**Max** : {data['maxRank']})"
@@ -48,63 +72,139 @@ class Codeforces(commands.Cog):
             contri = data['contribution']
             frnd = data['friendOfCount']
             registered_on = data['registrationTimeSeconds']
-            registered_on = datetime.fromtimestamp(registered_on)
-
+            registered_on = datetime.datetime.fromtimestamp(registered_on)
             # embedding for return message
-            embed = discord.Embed(title=name, url=f"https://codeforces.com/profile/{username}", color=discord.Color.blue())
-            embed.set_author(name=ctx.author.display_name,icon_url=ctx.author.avatar_url)
+            embed.set_author(name=ctx.author.display_name,
+                             icon_url=ctx.author.avatar_url)
             embed.set_thumbnail(url=img_url)
             embed.add_field(name="Country", value=country, inline=False)
             embed.add_field(name="Rank", value=rank, inline=False)
             embed.add_field(name="Rating", value=rating, inline=False)
             embed.add_field(name="Contribution", value=contri, inline=False)
             embed.add_field(name="Total Friends", value=frnd, inline=False)
-            embed.add_field(name="Registered On",value=registered_on, inline=False)
-            await ctx.send(embed=embed)
+            embed.add_field(name="Registered On",
+                            value=registered_on, inline=False)
+            await _sendEmbed(ctx, embed)
         else:
             await ctx.send("User not found")
+
+    @commands.command(
+        name='gimme', aliases=['getproblem', 'getprob'], description='Gives the problem based on given tags'
+    )
+    async def __gimme(self, ctx, *args):
+        """For getting a codeforces problem based on given tags"""
+        if not args:
+            await ctx.send('>>> No arguments passed')
+            return
+        rating = 0
+        tags = []
+        problems = []
+        for arg in args:
+            if arg.isdigit():
+                rating = int(arg)
+            else:
+                tags.append(arg)
+
+        # If the problem is solved by the curr user we have to skip, this will be done when database is managed :)
+
+        problem = _getProblem(rating, tags)
+
+        if type(problem) == str:
+            await ctx.send(f">>> {problem}")
+        else:
+            prob_url = f"https://codeforces.com/problemset/problem/{problem['contestId']}/{problem['index']}"
+            embed = discord.Embed()
+            embed.description = f'>>> [{problem["index"]} {problem["name"]} ]({prob_url})'
+            tags_str = '`'
+            for tag in args:
+                tags_str += tag+'` `'
+            tags_str = tags_str[: -2]
+            embed.add_field(name="Tags", value=tags_str, inline=False)
+            embed.set_footer(text='HFGL')
+            await _sendEmbed(ctx, embed)
+
+    @commands.command(
+        name='contestreminder', aliases=['ctr'],
+        description='For Contest Times',
+
+    )
+    @commands.has_permissions(administrator=True)
+    async def __contestreminder(self, ctx):
+        """For enabling Contest Notifications **Administrator Permission Required**"""
+        print('entered')
+        role = int(_getRoleId(ctx))
+        role = f'<@&{role}>'
+        print(role)
+        channel = int(_getChannelId(ctx))
+        print(channel)
+        channel = ctx.bot.get_channel(channel)
+        print(channel)
+        contests = _getContest()
+
+        await ctx.send('>>> Contest Reminder Enabled..')
+        for contest in contests:
+            UTC = timezone.utc
+            summary = _textFormatting(contest['summary'])
+            url = contest['htmlLink']
+            if 'location' in contest:
+                url = contest['location']
+            if 'dateTime' in contest['start']:
+
+                conteststart = contest['start']['dateTime']
+                conteststart = datetime.datetime.strptime(
+                    conteststart, '%Y-%m-%dT%H:%M:%S%z')
+                conteststart = conteststart.astimezone(UTC)
+
+                contestend = contest['end']['dateTime']
+                contestend = datetime.datetime.strptime(
+                    contestend, '%Y-%m-%dT%H:%M:%S%z')
+                contestend = contestend.astimezone(UTC)
+
+                time_duration = contestend - conteststart
+                time_duration = str(time_duration)
+                time_duration = time_duration[: -3]
+                time_duration += ' hr'
+                print(time_duration)
+            else:
+                conteststart = contest['start']['date']
+                conteststart = datetime.datetime.strptime(
+                    conteststart, '%Y-%m-%d')
+                conteststart = conteststart.astimezone(UTC)
+
+                contestend = contest['end']['date']
+                contestend = datetime.datetime.strptime(contestend, '%Y-%m-%d')
+                contestend = contestend.astimezone(UTC)
+
+                time_duration = 'All day'
+
+            print(f'conteststart : {conteststart}')
+            print(f'contestend : {contestend}')
+            print(time_duration)
+
+            remindertime = conteststart - \
+                timedelta(minutes=30)  # 30 min before time
+
+            print(f'remindertime : {remindertime}')
+
+            prindate = conteststart.strftime("%d %b %Y, %H:%M %Z")
+            message = f'`{prindate} | {time_duration}`'
+
+            embed = discord.Embed(title='Contest Reminder')
+            embed.add_field(name=summary, value=f'{message}', inline=False)
+            embed.add_field(name='*Contest Link*', value=f'[Link]({url})')
+            embed.set_footer(text='Provided to you by Pi bot')
+
+            await discord.utils.sleep_until(remindertime)
+            await channel.send(role, embed=embed)
+
+        # @tasks.loop(seconds=1)
+        # async def test(self):
+        #     # print('Test')
+        #     # channel = int(_getChannelId(ctx))
+        #     # channel = client.get_channel(channel)
+        #     print(bot.guild.id)
+        #     # await channel.send('chot vol 1')
 
 
 def setup(bot):
     bot.add_cog(Codeforces(bot))
-
-
-# Auxilarry Function
-def is_valid(username: str):
-    user_object = requests.get(f"https://codeforces.com/api/user.info?handles={username}")
-    data = json.loads(user_object.text)
-    status = data["status"]
-
-    if status == 'OK':
-        return data
-    else:
-        return False
-
-
-def user_info(obj: dict):
-    default_obj = {
-        "lastName": "-",
-        "country": "-",
-        "lastOnlineTimeSeconds": 0,
-        "city": "-",
-        "rating": 0,
-        "friendOfCount": 0,
-        "titlePhoto": "-",
-        "handle": "-",
-        "avatar": "-",
-        "firstName": "-",
-        "contribution": 0,
-        "organization": "-",
-        "rank": "-",
-        "maxRating": 0,
-        "registrationTimeSeconds": 0,
-        "maxRank": "-"
-    }
-    if len(default_obj) == len(obj):
-        return obj
-    else:
-        key_obj = list(obj)
-        for i in key_obj:
-            default_obj[i] = obj[i]
-    return default_obj
-
