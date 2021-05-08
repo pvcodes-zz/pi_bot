@@ -16,7 +16,7 @@ class Help(commands.Cog):
         """Shows all modules of that bot"""
 
         prefix = _getPrefix2(ctx)
-        version = 'π bot - (pre α)'
+        version = 'π bot - α'
 
         owner = '<@441501033294987264>'
         owner_name = 'undefined#1977'
