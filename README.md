@@ -1,10 +1,12 @@
-<h1 align=center> Pi Bot</h1>
+<h1 align=center> Pi Bot - α</h1>
 <p>
 Welcome to π bot, it is the will be an all-purpose bot for competative programming, github and other stuff.
 
 **NOTE**- For now the github integration is at hold, mainly focus is on [codeforces](https://codeforces.com).
 
 </p>
+
+To know more about bot commands visit [Command Docs](https://pvcodes.github.io/pi_bot_commands/)
 
 <h2> How to test the bot before running it on your server</h2>
 
@@ -14,6 +16,8 @@ To test the bot join the [Support Server](https://discord.gg/FjVVkTtbgp). And he
 
 [Invite the bot to your server](https://discordapp.com/oauth2/authorize?&client_id=833191736335400970&scope=bot)
 [_NOTE- While uing the bot if you find any issue or bug please head over to the [issue](https://github.com/pvcodes/pi_bot/issues) and create an new issue elaborating the issue_]
+
+[NOTE- The music cog is not yet setup in the hosted bot]
 
 ## Hosting the bot locally:
 
@@ -33,8 +37,21 @@ DISCORD_BOT_TOKEN=<your token>
 pipenv install
 ```
 
+### [Optional] For having contest reminder command working locally, you will need a login in [Google Cloud Platform](https://console.cloud.google.com/) and perform these steps:
+
+- Get an Google Calander API
+- Get the `credentials.json` from &nbsp; `APIs and services -> Credentials` &nbsp; click on CREATE CREDENTIALS and follow required steps
+- Copy and paste `credentials.json` file to [src](/src) folder 
+
+### [Optional] For having music stuff working (make sure you have [JVM](https://www.java.com/en/download/) working), Follow these:
+
+- Run the command `java -jar Lavalink.jar`
+
+
 - Enjoy! (don't forget to add your own bot into your discord server by generating an invite link from the discord developers application page in [OAuth2 section](https://discord.com/developers/applications/) and choose application and check Oauth2 section)
 - You may do bug-reporting or ask for help in on the SupportServer... or just open an issue on this repo.
+
+<b>Note: </b>If you get `module not found error`, try to run `pip install -r requirenment.txt`
 
 ## How to contribute
 
@@ -100,7 +117,7 @@ git push origin <branch-name>
 
 Submit an issue on GitHub and add as much information as you can about the bug, with screenshots of inputs to the bot and bot response if possible (if the issue is regarding bugs).
 
-**Note**: For more detailed information about how to contribute, please refere to the [CONTRIBUTING.md](https://github.com/pvcodes/pi_bot/blob/main/CONTRIBUTING.md) file.
+**Note**: For more detailed information about how to contribute, please refere to the [CONTRIBUTING.md](docs/CONTRIBUTING.md) file.
 
 ## Requirements:
 
@@ -108,10 +125,10 @@ Submit an issue on GitHub and add as much information as you can about the bug, 
 - discord(rewrite branch)
 - python-dotenv
 - requests
-
+- wavelink
 </p>
 
 <div align="center">
-<a href="https://raw.githubusercontent.com/Vyvy-vi/TearDrops/main/LICENSE"><img src="https://img.shields.io/github/license/Vyvy-vi/TearDrops?style=flat-square" alt="MIT license"></a>
+<a href="docs/LICENSE.md"><img src="https://img.shields.io/github/license/Vyvy-vi/TearDrops?style=flat-square" alt="MIT license"></a>
 <a href="https://github.com/Rapptz/discord.py/releases/tag/v1.5.0"><img src="https://img.shields.io/badge/discord.py-v1.6.0-7289da.svg?style=flat-square" alt="discord.py version"></a>
 </div>

@@ -7,15 +7,14 @@ name = "pypi"
 allow_prereleases = true
 
 [packages]
-"discord.py" = "~=1.7.0"
+"discord =" = "==1.0.1"
 python-dotenv = "==0.17.0"
 aiohttp = "==3.7.4.post0"
 requests = "==2.25.1"
+"discord.py" = "~=1.7.0"
+youtube-dl = "*"
 
 [dev-packages]
-
-[requires]
-python_version = "3.8"
 
 [scripts]
 start = "python bot.py"
