@@ -6,7 +6,7 @@ Welcome to π bot, it is the will be an all-purpose bot for competative programm
 
 </p>
 
-To know more about bot commands visit [Command Docs](https://pvcodes.github.io/pi_bot_commands/)
+To know more about bot commands visit [Command Docs](docs/COMMAND.md)
 
 <h2> How to test the bot before running it on your server</h2>
 
